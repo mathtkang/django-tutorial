@@ -11,16 +11,34 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import os, json
+from django.core.exceptions import ImproperlyConfigured
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-3zdg%m!go&*@ff1e7=osfbc*r!wv3$e_@#(4&zev^+u!^k(_bq'
+
+# secrets.json 파일 위치 명시
+secret_file = os.path.join(BASE_DIR, 'config/secrets.json') 
+
+with open(secret_file) as f:
+    secrets = json.loads(f.read())
+
+def get_secret(setting, secrets=secrets):
+    '''Get a secret OR keyerror'''
+    try:
+        return secrets[setting]
+    except KeyError:
+        error_msg = f"Set the {setting} environment variable"
+        raise ImproperlyConfigured(error_msg)
+
+SECRET_KEY = get_secret("SECRET_KEY")
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -82,15 +100,16 @@ DATABASES = {
 }
 
 # DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',  # 사용할 db 엔진 설정
-#         'NAME': 'tutorialdb',
-#         'USER': 'tutorialuser',
-#         'PASSWORD': 'devpassword', 
-#         'HOST': '127.0.0.1',
-#         'PORT': '3306',  # mysql default portnum
+#     "default": {
+#         "ENGINE": "django.db.backends.mysql",
+#         "NAME": "tutorialdb",
+#         "USER": "tutorialuser",
+#         "PASSWORD": "devpassword", 
+#         "HOST": "127.0.0.1",
+#         "PORT": "3306"
 #     }
 # }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
